@@ -1,6 +1,4 @@
-// swift-tools-version:5.3
-// In order to support users running on the latest Xcodes, please ensure that
-// Package@swift-5.5.swift is kept in sync with this file.
+// swift-tools-version:4.2
 /*
  This source file is part of the Swift.org open source project
 
@@ -14,33 +12,26 @@
 import PackageDescription
 import class Foundation.ProcessInfo
 
-let cmarkPackageName = ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil ? "swift-cmark" : "swift-cmark-gfm"
-
 let package = Package(
     name: "swift-markdown",
     products: [
         .library(
             name: "Markdown",
             targets: ["Markdown"]),
+        .executable(
+            name: "markdown-tool",
+            targets: ["markdown-tool"]),
     ],
     targets: [
         .target(
             name: "Markdown",
-            dependencies: [
-                "CAtomic",
-                .product(name: "cmark-gfm", package: cmarkPackageName),
-                .product(name: "cmark-gfm-extensions", package: cmarkPackageName),
-            ]),
+            dependencies: ["cmark-gfm", "cmark-gfm-extensions", "CAtomic"]),
         .target(
             name: "markdown-tool",
-            dependencies: [
-                "Markdown",
-                .product(name: "ArgumentParser", package: "swift-argument-parser")
-            ]),
+            dependencies: ["Markdown", .product(name: "ArgumentParser", package: "swift-argument-parser")]),
         .testTarget(
             name: "MarkdownTests",
-            dependencies: ["Markdown"],
-            resources: [.process("Visitors/Everything.md")]),
+            dependencies: ["Markdown"]),
         .target(name: "CAtomic"),
     ]
 )
@@ -52,7 +43,7 @@ if ProcessInfo.processInfo.environment["SWIFTCI_USE_LOCAL_DEPS"] == nil {
     // Building standalone, so fetch all dependencies remotely.
     package.dependencies += [
         .package(url: "https://github.com/apple/swift-cmark.git", .branch("gfm")),
-        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "1.0.1")),
+        .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.4.4")),
     ]
 } else {
     // Building in the Swift.org CI system, so rely on local versions of dependencies.
